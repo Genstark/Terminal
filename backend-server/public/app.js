@@ -199,7 +199,7 @@ term.onData((e) => {
             input = input.slice(0, cursorX - 1) + input.slice(cursorX);
             // cursorX--;
             term.write(`\x1b[2K\r$~${input}`);
-            // term.write(`\x1b[${4};${y}H`);
+            // term.write(`\x1b[4;1H`);
             console.log(input.length, input);
             console.log(cursorX);
             cursorX = input.length;
