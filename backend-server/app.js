@@ -111,22 +111,25 @@ io.on('connection', (socket) => {
     socket.on('term', (data) => {
         console.log(data);
         // io.to(data.id).emit('get', { message: 'message got', id: data.id, number: Math.floor(Math.random() * (100000 - 1) - 1) });
+        if (data.datafill) {
+            request('https://cmpmarketplacebackend.onrender.com/items', function (error, response, body) {
+                if (error) {
+                    console.error('Error:', error);
+                    return;
+                }
 
-        request('https://cmpmarketplacebackend.onrender.com/items', function (error, response, body) {
-            if (error) {
-                console.error('Error:', error);
-                return;
-            }
-
-            if (response.statusCode === 200) {
-                console.log('Response Body:', body);
-                const items = JSON.parse(body);
-                io.to(data.id).emit('get', { message: 'message got', id: data.id, number: Math.floor(Math.random() * (100000 - 1) - 1), items: items });
-            } else {
-                console.log('Status Code:', response.statusCode);
-            }
-        });
-
+                if (response.statusCode === 200) {
+                    console.log('Response Body:', body);
+                    const items = JSON.parse(body);
+                    io.to(data.id).emit('get', { message: 'message got', id: data.id, number: Math.floor(Math.random() * (100000 - 1) - 1), items: items });
+                } else {
+                    console.log('Status Code:', response.statusCode);
+                }
+            });
+        }
+        else {
+            io.to(data.id).emit('get', { message: 'command is not complete', id: data.id, items: { data: false } });
+        }
     });
 
     socket.on('disconnect', () => {

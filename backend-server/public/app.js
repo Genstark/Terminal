@@ -40,9 +40,28 @@ const keyMappings = {
     '\x1b[24~': 'F12 key pressed'
 };
 
+const helpCommand = [
+    { command: 'help', dis: 'show all command and how to use' },
+    { command: 'clear', dis: 'clear the screen' },
+    { command: 'exit', dis: 'exit the program' },
+    { command: 'send', dis: 'call data from server' },
+];
 const commands = ['help', 'calc', 'connection', 'clear', 'ls', 'send'];
 let userCommands = []
 let x, y;
+
+const colors = {
+    'red': '\x1b[91m',
+    'green': '\x1b[92m',
+    'blue': '\x1b[94m',
+    'yellow': '\x1b[93m',
+    'magenta': '\x1b[95m',
+    'cyan': '\x1b[96m',
+    'reset': '\x1b[0m',
+    'white': '\x1b[37m'
+};
+
+const progressBar = '\u2588';
 
 term.onCursorMove(() => {
     const cursorX = term._core.buffer.x;
@@ -56,8 +75,8 @@ term.open(document.getElementById('terminal'));
 term.write('$~');
 let input = '';
 
-let inputlength = 0
-let cursorX = 0
+let inputlength = 0;
+let cursorX = 0;
 
 let lastcommand = 0;
 let isListenerAdded = false;
@@ -141,11 +160,13 @@ term.onData((e) => {
         userCommands.push(input);
         lastcommand = userCommands.length - 1;
 
-        if (input === '') {
+        if (input.trim() === '') {
             term.write('\n$~');
         }
-        else if (input === 'h') {
-            term.write('\nhelp\n$~');
+        else if (input.trim() === 'h' || input.trim() === 'help') {
+            term.write('\nFor more information on a specific command, type HELP command-name');
+            helpCommand.forEach(data => term.write(`\n${colors.blue}--${data.command} ${colors.cyan}${data.dis}`));
+            term.write(`\n${colors.white}$~`);
         }
         else if (input.trim() === 'read') {
             term.write('\nread\n$~');
@@ -159,9 +180,9 @@ term.onData((e) => {
         }
         else if (input.trim() === 'ls') {
             for (let i = 0; i < commands.length; i++) {
-                term.write(`\n--${commands[i]}`);
+                term.write(`\n${colors.blue}--${commands[i]}`);
             }
-            term.write(`\n$~`);
+            term.write(`\n${colors.white}$~`);
         }
         else if (input.trim() === 'clear') {
             term.clear();
@@ -175,10 +196,15 @@ term.onData((e) => {
                 socket.on('get', (data) => {
                     console.log(data);
                     const items = data.items.data;
-                    for (let i = 0; i < items.length; i++) {
-                        term.write(`\n${items[i]._id} ${items[i].user_id}`);
+                    if (items) {
+                        for (let i = 0; i < items.length; i++) {
+                            term.write(`\n${colors.green}${items[i]._id} ${items[i].user_id}`);
+                        }
+                        term.write(`${colors.white}\n$~`);
                     }
-                    term.write(`\n$~`);
+                    else {
+                        term.write(`\n${colors.red}No data ${data.message}${colors.white}\n$~`);
+                    }
                 });
                 isListenerAdded = true;
             }
@@ -188,7 +214,7 @@ term.onData((e) => {
                 term.write(`\n${eval(input)}\n$~`);
             }
             catch {
-                term.write(`\n${input} invalid\n$~`);
+                term.write(`\n${colors.red}${input} ${colors.white}invalid\n$~`);
             }
         }
         input = '';
@@ -241,11 +267,15 @@ function check(data) {
 
 function toServer(userinput) {
     const data = userinput.split(' ');
-    if (data[0] === 'send') {
+    if (data[0] === 'send' && data.length > 1) {
         data.shift();
         console.log(data);
         const message = data.join(' ');
-        socket.emit('term', { message: message, id: socket.id });
+        socket.emit('term', { message: message, id: socket.id, datafill: true });
+    }
+    else {
+        console.log('incomplete command');
+        socket.emit('term', { message: null, id: socket.id, datafill: false });
     }
 }
 
