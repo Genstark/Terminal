@@ -63,6 +63,13 @@ const colors = {
 
 const progressBar = '\u2588';
 
+function setCursorPosition(x, y) {
+    // Move the cursor to the (x, y) position using ANSI escape codes
+    // term.write(`\x1b[${y};${x}H`);
+    term.write(`\x1b[H`);
+    console.log(`Cursor manually moved to: (${x}, ${y})`);
+}
+
 term.onCursorMove(() => {
     const cursorX = term._core.buffer.x;
     const cursorY = term._core.buffer.y;
@@ -70,6 +77,7 @@ term.onCursorMove(() => {
     y = cursorY;
     console.log(`Cursor position: (${cursorX}, ${cursorY})`);
 });
+
 
 term.open(document.getElementById('terminal'));
 term.write('$~');
@@ -139,12 +147,27 @@ term.onData((e) => {
 
 
     if (e.startsWith('\x1b')) {
+        console.log(e);
         if (keyMappings[e]) {
             term.write(`\n${keyMappings[e]}\n$~`);
             return;
         }
         else if (e === '\x1b[A' || e === '\x1b[B') {
             return;
+        }
+        else if (e === '\x1b' || e === '\e') {
+            console.log('esc key');
+            term.write('\nesc key\n$~');
+        }
+        else if (e === '\x1b[3~') {
+            console.log('delete key');
+            term.write('\ndelete key\n$~');
+        }
+        else if (e === '\x1b[H') {
+            console.log('home key');
+        }
+        else if (e === '\x1b[F') {
+            console.log('end key');
         }
         else {
             term.write(`Unknown escape sequence: ${e}\n$~`);
@@ -207,6 +230,26 @@ term.onData((e) => {
                     }
                 });
                 isListenerAdded = true;
+            }
+        }
+        else if (input.trim().split(' ')[0] === 'search') {
+            findServer(input);
+            term.write(`\nsearching...`);
+            if (!isListenerAdded) {
+                socket.on('term_search', (data) => {
+                    console.log(data);
+                    const items = data.items.data;
+                    if (items) {
+                        console.log(items._id, items.user_id);
+                        for (let i = 0; i < items.length; i++) {
+                            term.write(`\n${colors.green}${items[0]._id} ${items[0].user_id}`);
+                        }
+                        term.write(`${colors.white}\n$~`);
+                    }
+                    else {
+                        term.write(`\n${colors.red}No data ${data.message}${colors.white}\n$~`);
+                    }
+                });
             }
         }
         else {
@@ -276,6 +319,20 @@ function toServer(userinput) {
     else {
         console.log('incomplete command');
         socket.emit('term', { message: null, id: socket.id, datafill: false });
+    }
+}
+
+function findServer(userinput) {
+    const data = userinput.split(' ');
+    if (data[0] === 'search' && data.length > 1) {
+        data.shift();
+        console.log(data);
+        const search = data.join(' ');
+        socket.emit('term_search', { message: search, id: socket.id, datafill: true });
+    }
+    else {
+        console.log('incomplete command');
+        socket.emit('term_search', { message: null, id: socket.id, datafill: false });
     }
 }
 

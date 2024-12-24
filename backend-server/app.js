@@ -132,6 +132,26 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('term_search', (data) => {
+        console.log(data);
+        if (data.datafill) {
+            request(`https://cmpmarketplacebackend.onrender.com/item/search/${data.message}`, function (error, response, body) {
+                if (error) {
+                    console.error('Error:', error);
+                    return;
+                }
+                if (response.statusCode === 200) {
+                    console.log('Response Body:', body);
+                    const items = JSON.parse(body);
+                    io.to(data.id).emit('term_search', { message: 'message got', id: data.id, number: Math.floor(Math.random() * (100000 - 1) - 1), items: items });
+                }
+                else {
+                    console.log('Status Code:', response.statusCode);
+                }
+            });
+        }
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected', socket.id);
         const findindex = connections.findIndex((conn) => conn.socketId === socket.id);
