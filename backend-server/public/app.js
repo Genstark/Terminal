@@ -46,7 +46,7 @@ const helpCommand = [
     { command: 'exit', dis: 'exit the program' },
     { command: 'send', dis: 'call data from server' },
 ];
-const commands = ['help', 'calc', 'connection', 'clear', 'ls', 'send'];
+const commands = ['help', 'calc', 'connection', 'clear', 'ls', 'send', 'search'];
 let userCommands = []
 let x, y;
 
@@ -59,6 +59,22 @@ const colors = {
     'cyan': '\x1b[96m',
     'reset': '\x1b[0m',
     'white': '\x1b[37m'
+};
+
+const keysRegression = {
+    'upKey': '\x1b[C',
+    'downKey': '\x1b[D',
+    'leftKey': '\x1b[A',
+    'rightKey': '\x1b[B',
+    'enterKey': '\r',
+    'backSpace': '\b',
+    'escKey': '\x1b' || '\e',
+    'homeKey': '\x1b[H',
+    'endKey': '\x1b[F',
+    'delete': '\x1b[3~',
+    'insert': '\x1b[2~',
+    'pageUp': '\x1b[5~',
+    'pageDown': '\x1b[6~',
 };
 
 const progressBar = '\u2588';
@@ -89,6 +105,14 @@ let cursorX = 0;
 let lastcommand = 0;
 let isListenerAdded = false;
 
+// term.element.addEventListener('keydown', (event) => {
+//     if (event.ctrlKey) {
+//         console.log(`Ctrl key pressed with: ${event.key}`);
+//     } else {
+//         console.log(`Key pressed: ${event.key}`);
+//     }
+// });
+
 term.onData((e) => {
 
     if (input.length === 0 && userCommands.length === 0) {
@@ -98,7 +122,7 @@ term.onData((e) => {
         }
     }
 
-    if (e === '\x1b[A') {
+    if (e === '\x1b[A' || e === keysRegression.pageUp) {
         const checkCommand = userCommands[lastcommand];
         console.log(lastcommand);
         if (checkCommand) {
@@ -111,7 +135,7 @@ term.onData((e) => {
             }
         }
     }
-    else if (e === '\x1b[B') {
+    else if (e === '\x1b[B' || e === keysRegression.downKey) {
         const checkCommand = userCommands[lastcommand];
         console.log(lastcommand);
         if (checkCommand) {
@@ -163,7 +187,7 @@ term.onData((e) => {
             console.log('delete key');
             term.write('\ndelete key\n$~');
         }
-        else if (e === '\x1b[H') {
+        else if (e === keysRegression.homeKey) {
             console.log('home key');
         }
         else if (e === '\x1b[F') {
