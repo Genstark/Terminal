@@ -77,6 +77,35 @@ const keysRegression = {
     'pageDown': '\x1b[6~',
 };
 
+const control = {
+    'ctrl+A': '\x01',
+    'ctrl+B': '\x02',
+    'ctrl+C': '\x03',
+    'ctrl+D': '\x04',
+    'ctrl+E': '\x05',
+    'ctrl+F': '\x06',
+    'ctrl+G': '\x07',
+    'ctrl+H': '\x08',
+    'ctrl+I': '\x09',
+    'ctrl+J': '\x0a',
+    'ctrl+K': '\x0b',
+    'ctrl+L': '\x0c',
+    'ctrl+M': '\x0d',
+    'ctrl+N': '\x0e',
+    'ctrl+O': '\x0f',
+    'ctrl+P': '\x10',
+    'ctrl+Q': '\x11',
+    'ctrl+R': '\x12',
+    'ctrl+S': '\x13',
+    'ctrl+T': '\x14',
+    'ctrl+U': '\x15',
+    'ctrl+V': '\x16',
+    'ctrl+W': '\x17',
+    'ctrl+X': '\x18',
+    'ctrl+Y': '\x19',
+    'ctrl+Z': '\x1a',
+};
+
 const progressBar = '\u2588';
 
 function setCursorPosition(x, y) {
@@ -114,6 +143,36 @@ let isListenerAdded = false;
 // });
 
 term.onData((e) => {
+
+    if (e === control["ctrl+A"]) {
+        console.log('Ctrl+A pressed');
+    }
+    if (e === control["ctrl+B"]) {
+        console.log('Ctrl+B pressed');
+    }
+    if (e === control["ctrl+C"]) {
+        console.log('Ctrl+C pressed');
+        input = '';
+        return;
+    }
+    if (e === control["ctrl+V"]) {
+        console.log('Ctrl+V pressed');
+        navigator.clipboard.readText().then(text => {
+            term.write(`${text}\n`);
+        }).catch(err => {
+            console.error('Error reading clipboard:', err);
+        });
+    }
+    if (e === control["ctrl+X"]) {
+        console.log('Ctrl+X pressed');
+    }
+    if (e === control["ctrl+Q"]) {
+        console.log('Ctrl+Q pressed');
+        term.clear();
+        term.write(`\x1b[2K\r$~`);
+        input = '';
+        return;
+    }
 
     if (input.length === 0 && userCommands.length === 0) {
         if (e === '\x1b[C' || e === '\x1b[D' || e === '\x1b[A' || e === '\x1b[B') {
@@ -238,6 +297,7 @@ term.onData((e) => {
         else if (input.trim().split(' ')[0] === 'send') {
             toServer(input);
             term.write(`\ndata sended`);
+            console.time('');
 
             if (!isListenerAdded) {
                 socket.on('get', (data) => {
@@ -246,6 +306,7 @@ term.onData((e) => {
                     if (items) {
                         for (let i = 0; i < items.length; i++) {
                             term.write(`\n${colors.green}${items[i]._id} ${items[i].user_id}`);
+                            // term.write(`\n${colors.green}${items[i]}`);
                         }
                         term.write(`${colors.white}\n$~`);
                     }
@@ -255,6 +316,7 @@ term.onData((e) => {
                 });
                 isListenerAdded = true;
             }
+            console.timeEnd('');
         }
         else if (input.trim().split(' ')[0] === 'search') {
             findServer(input);
