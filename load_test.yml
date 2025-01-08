@@ -1,0 +1,19 @@
+# load_test.yml
+config:
+  target: 'https://cmpmarketplacebackend.onrender.com'  # Your server URL (replace with your server's address)
+  phases:
+    - duration: 60      # Duration of the test in seconds
+      arrivalRate: 50   # 5 users per second
+    - duration: 120     # Another test phase with a longer duration
+      arrivalRate: 100  # 10 users per second
+
+scenarios:
+  - flow:
+      - get:
+          url: "/"       # Home page request (can add more if needed)
+      - get:
+          url: "/items"
+      - get:
+          url: "/item/search/laptop"
+      - get:
+          url: "/items/666818b4318dbcd0a5fd7a23"

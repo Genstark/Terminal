@@ -309,6 +309,7 @@ term.onData((e) => {
                             // term.write(`\n${colors.green}${items[i]}`);
                         }
                         term.write(`${colors.white}\n$~`);
+                        console.timeEnd('');
                     }
                     else {
                         term.write(`\n${colors.red}No data ${data.message}${colors.white}\n$~`);
@@ -316,7 +317,6 @@ term.onData((e) => {
                 });
                 isListenerAdded = true;
             }
-            console.timeEnd('');
         }
         else if (input.trim().split(' ')[0] === 'search') {
             findServer(input);
