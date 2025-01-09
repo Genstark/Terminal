@@ -1,11 +1,12 @@
 # load_test.yml
+# artillery
 config:
   target: 'https://cmpmarketplacebackend.onrender.com'  # Your server URL (replace with your server's address)
   phases:
     - duration: 60      # Duration of the test in seconds
-      arrivalRate: 50   # 5 users per second
-    - duration: 120     # Another test phase with a longer duration
-      arrivalRate: 100  # 10 users per second
+      arrivalRate: 5000   # 5 users per second
+    # - duration: 120     # Another test phase with a longer duration
+    #   arrivalRate: 100  # 10 users per second
 
 scenarios:
   - flow:

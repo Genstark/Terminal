@@ -11,7 +11,6 @@ const io = socketIo(server, {
     maxHttpBufferSize: 20e6
 });
 
-
 app.use(express.static(path.resolve(__dirname, 'public'), { 'extensions': ['html', 'css', 'js'] }));
 
 app.get('/', (req, res) => {
@@ -161,6 +160,16 @@ io.on('connection', (socket) => {
         else {
             console.log('No matching socket ID found for disconnect');
         }
+    });
+});
+
+const admin = io.of('/admin');
+admin.on('connect', (socket) => {
+
+    console.log('admin connected', socket.id);
+
+    socket.on('disconnect', () => {
+        console.log('admin disconnected', socket.id);
     });
 });
 

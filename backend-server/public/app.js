@@ -1,5 +1,6 @@
 // const socket = io('https://nodelink-guxh.onrender.com/');
 const socket = io('http://localhost:5173');
+let admin;
 
 let term = new Terminal({ convertEol: true });
 let output = '';
@@ -337,6 +338,26 @@ term.onData((e) => {
                     }
                 });
             }
+        }
+        else if (input.trim().split(' ')[0] === 'admin') {
+            admin = io('http://localhost:5173/admin');
+            admin.on('connect', () => {
+                console.log('admin connected', admin.id);
+                // admin.emit('message', 'admin send');
+            });
+            term.write('\n$~');
+            // console.log(admin);
+        }
+        else if (input.trim().split(' ')[0] === 'admin-d') {
+            if (admin['connected']) {
+                console.log('admin disconnect');
+                admin.disconnect();
+            }
+            else {
+                console.log('No admin connection to disconnect');
+            }
+            term.write('\n$~');
+            // console.log(admin);
         }
         else {
             try {
