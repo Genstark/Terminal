@@ -1,6 +1,6 @@
 // const socket = io('https://nodelink-guxh.onrender.com/');
 const socket = io('http://localhost:5173');
-let admin;
+let admin, images;
 
 let term = new Terminal({ convertEol: true });
 let output = '';
@@ -348,6 +348,12 @@ term.onData((e) => {
             term.write('\n$~');
             // console.log(admin);
         }
+        else if (input.trim().split(' ')[0] === 'admin-m') {
+            if (admin['connected']) {
+                admin.emit('message', senddata(input));
+            }
+            term.write('\n$~');
+        }
         else if (input.trim().split(' ')[0] === 'admin-d') {
             if (admin['connected']) {
                 console.log('admin disconnect');
@@ -358,6 +364,30 @@ term.onData((e) => {
             }
             term.write('\n$~');
             // console.log(admin);
+        }
+        else if (input.trim().split(' ')[0] === 'images') {
+            images = io('http://localhost:5173/images');
+            images.on('connect', () => {
+                console.log('images connected', images.id);
+                // images.emit('message', 'images send');
+            });
+            term.write('\n$~');
+        }
+        else if (input.trim().split(' ')[0] === 'images-m') {
+            if (images['connected']) {
+                images.emit('message', senddata(input));
+            }
+            term.write('\n$~');
+        }
+        else if (input.trim().split(' ')[0] === 'images-d') {
+            if (images['connected']) {
+                console.log('images disconnect');
+                images.disconnect();
+            }
+            else {
+                console.log('No images connection to disconnect');
+            }
+            term.write('\n$~');
         }
         else {
             try {
@@ -397,6 +427,19 @@ term.onData((e) => {
     }
 });
 
+function senddata(data) {
+    const arry = data.split(' ');
+    if (arry[0] === 'admin-m') {
+        try {
+            arry.shift();
+            const message = arry.join(' ');
+            console.log(message);
+            return message;
+        } catch (error) {
+            console.log('Error in evaluating expression:', error.message);
+        }
+    }
+}
 
 function check(data) {
     const arry = data.split(' ');

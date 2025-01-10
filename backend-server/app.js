@@ -165,11 +165,22 @@ io.on('connection', (socket) => {
 
 const admin = io.of('/admin');
 admin.on('connect', (socket) => {
-
     console.log('admin connected', socket.id);
+
+    socket.on('message', (data) => {
+        console.log('admin message', data);
+    });
 
     socket.on('disconnect', () => {
         console.log('admin disconnected', socket.id);
+    });
+});
+
+const images = io.of('/images');
+images.on('connect', (socket) => {
+    console.log('images connected', socket.id);
+    socket.on('disconnect', () => {
+        console.log('images disconnected', socket.id);
     });
 });
 
