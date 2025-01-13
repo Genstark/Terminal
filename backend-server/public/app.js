@@ -389,6 +389,16 @@ term.onData((e) => {
             }
             term.write('\n$~');
         }
+        else if (input.trim().split(' ')[0] === 'runserv') {
+            console.log('connections', socket.id);
+            if(admin['connected']){
+                console.log('admin');
+            }
+            if(images['connected']){
+                console.log('images');
+            }
+            term.write('\n$~');
+        }
         else {
             try {
                 term.write(`\n${eval(input)}\n$~`);
